@@ -7,9 +7,10 @@ Prateek's code can be found at: https://github.com/prateek22sri/Graph-Delta-Step
 
 from math import floor, sqrt
 import Graph as gr
-import matplotlib.pyplot as plt
+import time
 from pprint import pprint
-
+from threading import Thread
+from threading import RLock
 
 class Algorithm:
     """
@@ -27,6 +28,7 @@ class Algorithm:
         self.totalNodes = 0
         self.totalEdges = 0
         self.B = {}
+        self.lock = RLock()
 
     def relax(self, w, x):
         """
@@ -35,6 +37,7 @@ class Algorithm:
         x is the distance of the vertex and w is the index of the vertex in the property map
         """
         # print("w=", w, "x=", x)
+        self.lock.acquire()
         if x < self.property_map[w]:
             # check if there is an entry of w in the dictionary B
             if self.property_map[w] != self.infinity:
@@ -54,6 +57,7 @@ class Algorithm:
 
             # update the property map
             self.property_map[w] = x
+        self.lock.release()
 
     def find_requests(self, vertices, kind, g):
         """
@@ -94,8 +98,12 @@ class Algorithm:
         :param request:
         :return:
         """
+        t = Thread()
         for key, value in request.items():
-            self.relax(key, value)
+            t = Thread(target=self.relax, args=[key, value])
+            t.start()
+        if len(request):
+            t.join()
 
     def delta_stepping(self, g):
         """
@@ -138,7 +146,9 @@ class Algorithm:
         :return:
         """
         self.property_map = {k: v for k, v in self.property_map.items() if v != self.infinity}
+        print(time.time())
         p = {k: v for k, v in g.dijkstra(self.source_vertex).items() if v != self.infinity}
+        print(time.time())
         if p == self.property_map:
             return True
         else:
@@ -167,7 +177,9 @@ def main():
         g.add_edge(e[0], e[1], e[2])
     a = Algorithm()
     a.source_vertex = details[2]
+    print(time.time())
     a.delta_stepping(g)
+    print(time.time())
     print("\nValidating Solution..")
     if not a.validate(g):
         exit(1)
