@@ -17,3 +17,7 @@ the following e lines have the format: u v w
 u = start
 v = dest
 w = weight of edge
+
+To run, use python3 and run deltaStepping.py:
+
+python3 deltaStepping.py
