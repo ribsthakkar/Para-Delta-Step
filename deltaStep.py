@@ -45,8 +45,11 @@ class Algorithm:
                     # check if the vertex is in the wrong bucket
                     if floor(x / self.delta) != floor(self.property_map[w] / self.delta):
                         self.B[floor(self.property_map[w] / self.delta)].remove(w)
-                self.B[floor(x / self.delta)].append(w)
-
+                if floor(x / self.delta) not in self.B:
+                    self.B[floor(x / self.delta)] = [w]
+                else:
+                    if w not in self.B[floor(x / self.delta)]:
+                        self.B[floor(x / self.delta)].append(w)
             # if the dictionary entry does not exist
             else:
                 if floor(x / self.delta) not in self.B:
@@ -100,9 +103,9 @@ class Algorithm:
         """
         # t = Thread()
         for key, value in request.items():
-            # t = Thread(target=self.relax, args=[key, value])
-            # t.start()
-            self.relax(key, value)
+            t = Thread(target=self.relax, args=[key, value])
+            t.start()
+            # self.relax(key, value)
         # if len(request):
         #     t.join()
 
@@ -189,8 +192,9 @@ def main():
     if not a.validate(g):
         exit(1)
     else:
-        print("\nThe shortest path from ", a.source_vertex, " is:")
-        pprint(a.property_map)
+        print('Implementation correct')
+        # print("\nThe shortest path from ", a.source_vertex, " is:")
+        # pprint(a.property_map)
 
     # # visualize the graph
     # if make_graph:
