@@ -7,9 +7,8 @@ Prateek's code can be found at: https://github.com/prateek22sri/Graph-Delta-Step
 
 from math import floor, sqrt
 import Graph as gr
-import matplotlib.pyplot as plt
 from pprint import pprint
-
+import time
 
 class Algorithm:
     """
@@ -187,4 +186,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
