@@ -10,6 +10,7 @@ import Graph as gr
 import time
 from pprint import pprint
 from threading import Thread
+from threading import active_count
 from threading import RLock
 
 class Algorithm:
@@ -102,12 +103,17 @@ class Algorithm:
         :return:
         """
         # t = Thread()
+        pool = set()
         for key, value in request.items():
             t = Thread(target=self.relax, args=[key, value])
             t.start()
+            pool.add(t)
             # self.relax(key, value)
         # if len(request):
         #     t.join()
+        print(active_count(), len(request))
+        for thr in pool:
+            thr.join()
 
     def delta_stepping(self, g):
         """
