@@ -146,9 +146,11 @@ class Algorithm:
         :return:
         """
         self.property_map = {k: v for k, v in self.property_map.items() if v != self.infinity}
+        print("Dijkstra Time")
         print(time.time())
-        p = {k: v for k, v in g.dijkstra(self.source_vertex).items() if v != self.infinity}
+        d = g.dijkstra(self.source_vertex)
         print(time.time())
+        p = {k: v for k, v in d.items() if v != self.infinity}
         if p == self.property_map:
             return True
         else:
@@ -177,6 +179,7 @@ def main():
         g.add_edge(e[0], e[1], e[2])
     a = Algorithm()
     a.source_vertex = details[2]
+    print("Delta Stepping Time")
     print(time.time())
     a.delta_stepping(g)
     print(time.time())
