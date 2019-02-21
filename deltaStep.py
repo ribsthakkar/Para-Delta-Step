@@ -37,7 +37,7 @@ class Algorithm:
         x is the distance of the vertex and w is the index of the vertex in the property map
         """
         # print("w=", w, "x=", x)
-        self.lock.acquire()
+        # self.lock.acquire()
         if x < self.property_map[w]:
             # check if there is an entry of w in the dictionary B
             if self.property_map[w] != self.infinity:
@@ -57,7 +57,7 @@ class Algorithm:
 
             # update the property map
             self.property_map[w] = x
-        self.lock.release()
+        # self.lock.release()
 
     def find_requests(self, vertices, kind, g):
         """
@@ -98,12 +98,13 @@ class Algorithm:
         :param request:
         :return:
         """
-        t = Thread()
+        # t = Thread()
         for key, value in request.items():
-            t = Thread(target=self.relax, args=[key, value])
-            t.start()
-        if len(request):
-            t.join()
+            # t = Thread(target=self.relax, args=[key, value])
+            # t.start()
+            self.relax(key, value)
+        # if len(request):
+        #     t.join()
 
     def delta_stepping(self, g):
         """
@@ -170,18 +171,19 @@ def main():
     # print("===================\n")
     # print(nx.info(g))
     # print("\nCalculating shortest path..")
-    details = list(map(int, input().split()))
-    num_nodes = details[0]
-    num_edges = details[1]
+    details = list(input().split())
+    num_nodes = int(details[2])
+    num_edges = int(details[3])
     g = gr.Graph(num_nodes)
     for edge in range(num_edges):
-        e = list(map(int, input().split()))
-        g.add_edge(e[0], e[1], e[2])
+        e = list(input().split())
+        g.add_edge(int(e[1]), int(e[2]), int(e[3]))
     a = Algorithm()
-    a.source_vertex = details[2]
+    a.source_vertex = int(details[4])
     print("Delta Stepping Time")
     print(time.time())
     a.delta_stepping(g)
+    # print(g.dijkstra(a.source_vertex))
     print(time.time())
     print("\nValidating Solution..")
     if not a.validate(g):
