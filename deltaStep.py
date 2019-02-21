@@ -10,6 +10,7 @@ import Graph as gr
 import time
 from pprint import pprint
 from threading import Thread
+from threading import active_count
 from threading import RLock
 
 class Algorithm:
@@ -45,8 +46,11 @@ class Algorithm:
                     # check if the vertex is in the wrong bucket
                     if floor(x / self.delta) != floor(self.property_map[w] / self.delta):
                         self.B[floor(self.property_map[w] / self.delta)].remove(w)
-                self.B[floor(x / self.delta)].append(w)
-
+                if floor(x / self.delta) not in self.B:
+                    self.B[floor(x / self.delta)] = [w]
+                else:
+                    if w not in self.B[floor(x / self.delta)]:
+                        self.B[floor(x / self.delta)].append(w)
             # if the dictionary entry does not exist
             else:
                 if floor(x / self.delta) not in self.B:
@@ -99,12 +103,17 @@ class Algorithm:
         :return:
         """
         # t = Thread()
+        pool = set()
         for key, value in request.items():
-            # t = Thread(target=self.relax, args=[key, value])
-            # t.start()
-            self.relax(key, value)
+            t = Thread(target=self.relax, args=[key, value])
+            t.start()
+            pool.add(t)
+            # self.relax(key, value)
         # if len(request):
         #     t.join()
+        print(active_count(), len(request))
+        for thr in pool:
+            thr.join()
 
     def delta_stepping(self, g):
         """
@@ -189,8 +198,9 @@ def main():
     if not a.validate(g):
         exit(1)
     else:
-        print("\nThe shortest path from ", a.source_vertex, " is:")
-        pprint(a.property_map)
+        print('Implementation correct')
+        # print("\nThe shortest path from ", a.source_vertex, " is:")
+        # pprint(a.property_map)
 
     # # visualize the graph
     # if make_graph:
