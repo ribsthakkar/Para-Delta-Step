@@ -115,6 +115,7 @@ class Algorithm:
         # pool = set()
         for key, value in request.items():
             t = Thread(target=self.relax, args=[key, value])
+<<<<<<< HEAD
             t.start()
             self.pool.add(t)
             # self.relax(key, value)
@@ -123,6 +124,17 @@ class Algorithm:
         #     thr.start()
         # for thr in pool:
         #     thr.join()
+=======
+            pool.add(t)
+            t.start()
+            # self.relax(key, value)
+        # if len(request):
+        #     t.join()
+        for thr in pool:
+            print(thr.name)
+            thr.join()
+
+>>>>>>> 888fa2338d2ab8474d6ed495c493475b62ca716c
     def delta_stepping(self, g):
         """
         This is the main function to implement the algorithm
@@ -168,9 +180,9 @@ class Algorithm:
         """
         self.property_map = {k: v for k, v in self.property_map.items() if v != self.infinity}
         print("Dijkstra Time")
-        print(time.time())
+        start_time = time.time()
         d = g.dijkstra(self.source_vertex)
-        print(time.time())
+        print(time.time() - start_time)
         p = {k: v for k, v in d.items() if v != self.infinity}
         if p == self.property_map:
             return True
@@ -224,4 +236,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
