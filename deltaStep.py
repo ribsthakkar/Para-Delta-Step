@@ -106,13 +106,13 @@ class Algorithm:
         pool = set()
         for key, value in request.items():
             t = Thread(target=self.relax, args=[key, value])
-            t.start()
             pool.add(t)
+            t.start()
             # self.relax(key, value)
         # if len(request):
         #     t.join()
-        print(active_count(), len(request))
         for thr in pool:
+            print(thr.name)
             thr.join()
 
     def delta_stepping(self, g):
@@ -157,9 +157,9 @@ class Algorithm:
         """
         self.property_map = {k: v for k, v in self.property_map.items() if v != self.infinity}
         print("Dijkstra Time")
-        print(time.time())
+        start_time = time.time()
         d = g.dijkstra(self.source_vertex)
-        print(time.time())
+        print(time.time() - start_time)
         p = {k: v for k, v in d.items() if v != self.infinity}
         if p == self.property_map:
             return True
