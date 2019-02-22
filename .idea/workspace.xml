@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7c7645b6-c2c7-48ba-a0e2-082fc4c57296" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/JavaDelta/src/Edge.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/JavaDelta/src/Graph.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/JavaDelta/src/Node.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JavaDelta/.idea/workspace.xml" afterPath="$PROJECT_DIR$/JavaDelta/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JavaDelta/src/Main.java" afterPath="$PROJECT_DIR$/JavaDelta/src/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/deltaStep.py" afterPath="$PROJECT_DIR$/deltaStep.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,17 +15,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Graph.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Graph.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Graph.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="836">
-              <caret line="56" column="26" lean-forward="true" selection-start-line="56" selection-start-column="26" selection-end-line="56" selection-end-column="26" />
+            <state relative-caret-position="-85">
+              <caret line="56" column="26" lean-forward="false" selection-start-line="56" selection-start-column="26" selection-end-line="56" selection-end-column="26" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="deltaStep.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="deltaStep.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deltaStep.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-1602">
@@ -333,6 +331,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Graph.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-85">
+          <caret line="56" column="26" lean-forward="false" selection-start-line="56" selection-start-column="26" selection-end-line="56" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/deltaStep.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1602">
@@ -340,14 +346,6 @@
           <folding>
             <element signature="e#342#370#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Graph.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="836">
-          <caret line="56" column="26" lean-forward="true" selection-start-line="56" selection-start-column="26" selection-end-line="56" selection-end-column="26" />
-          <folding />
         </state>
       </provider>
     </entry>
