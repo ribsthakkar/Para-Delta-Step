@@ -36,13 +36,13 @@ public class Node implements Comparable<Node> {
     public HashMap<Node, Integer> getAdjacent() {
         return adjacent;
     }
-    public synchronized void setWeight(int weight) {
+    public void setWeight(int weight) {
         this.weight = weight;
     }
     public boolean isVisited() {
         return visit;
     }
-    public synchronized int getWeight() {
+    public int getWeight() {
         return weight;
     }
     public int getID() {
