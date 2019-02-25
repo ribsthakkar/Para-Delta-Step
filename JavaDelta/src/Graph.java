@@ -12,6 +12,8 @@ public class Graph<V> {
 	private ArrayList<V> vertexList;
 
 	private boolean directed;
+	public int numEdges;
+	public int numNodes;
 
 	public Graph(boolean isDirected) {
 		directed = isDirected;
@@ -19,6 +21,9 @@ public class Graph<V> {
 		vertexList = new ArrayList<V>();
 	}
 
+	private void updateValues() {
+		numNodes = vertexList.size();
+	}
 	public void add(V vertex, ArrayList<Edge<V>> connectedVertices) {
 		// Add the new vertex to the adjacencyList with it's list of connected
 		// nodes
@@ -45,7 +50,7 @@ public class Graph<V> {
 				correspondingConnectedList.add(new Edge<V>(vertex, weight));
 			}
 		}
-
+		updateValues();
 	}
 
 	public boolean addArc(V source, V end, int weight) {
@@ -66,6 +71,8 @@ public class Graph<V> {
 		}
 
 		adjacencyList.get(source).add(new Edge<V>(end, weight));
+		numEdges++;
+		updateValues();
 		return true;
 	}
 
@@ -90,6 +97,8 @@ public class Graph<V> {
 
 		adjacencyList.get(vertexOne).add(new Edge<V>(vertexTwo, weight));
 		adjacencyList.get(vertexTwo).add(new Edge<V>(vertexOne, weight));
+		numEdges++;
+		updateValues();
 		return true;
 	}
 
@@ -130,5 +139,15 @@ public class Graph<V> {
 			s += "\n";
 		}
 		return s;
+	}
+
+	public int getEdgeWeight(V source, V dest) {
+		ArrayList<Edge<V>> e = adjacencyList.get(source);
+		for(Edge ed: e) {
+			if (ed.getVertex().equals(dest)) {
+				return ed.getWeight();
+			}
+		}
+		return -1;
 	}
 }

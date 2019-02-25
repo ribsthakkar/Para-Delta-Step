@@ -7,28 +7,33 @@ public class Main {
 
 		System.out.println("Hello World!");
 
-		Graph<String> graph = new Graph<>(true);
-		ArrayList<Edge<String>> connected = new ArrayList<>();
-		connected.add(new Edge<String>("B", 2));
-		connected.add(new Edge<String>("C", 12));
-		connected.add(new Edge<String>("D", 7));
-		graph.add("A", connected);
+		Graph<Integer> graph = new Graph<>(true);
+		ArrayList<Edge<Integer>> connected = new ArrayList<>();
+		connected.add(new Edge<>(2, 2));
+		connected.add(new Edge<>(3, 12));
+		connected.add(new Edge<>(4, 7));
+		graph.add(1, connected);
 
-		graph.addArc("C", "B", 1);
+		graph.addArc(3, 2, 1);
 
-		graph.addArc("Z", "F", 4);
+		graph.addArc(8, 6, 4);
 
-		graph.addArc("Z", "R", 5);
+		graph.addArc(8, 7, 5);
 
-		graph.addArc("D", "Z", 1);
+		graph.addArc(4, 8, 1);
 
-		graph.addArc("F", "D", 1);
+		graph.addArc(6, 4, 1);
 
-		graph.addArc("W", "L", 1);
+		graph.addArc(8, 1, 1);
 
 		System.out.println(graph.toString());
 
-		System.out.println(Main.dijkstraShortestPath(graph, "A"));
+		System.out.println(Main.dijkstraShortestPath(graph, 8));
+		Delta d = new Delta(5, 8, graph.numNodes, graph.numEdges);
+		d.delta_stepping(graph);
+		for(int node:d.property_map.keySet()) {
+			System.out.println("Cost to Node " + node + " is "+ d.property_map.get(node));
+		}
 	}
 
 	public static <V> HashMap<V, Double> dijkstraShortestPath(Graph<V> graph, V source) {

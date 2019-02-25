@@ -12,6 +12,11 @@ from pprint import pprint
 from threading import Thread
 from threading import active_count
 from threading import RLock
+from threading import current_thread
+import multiprocessing
+from multiprocessing.managers import SyncManager
+from time import sleep
+
 
 class Algorithm:
     """
@@ -30,6 +35,7 @@ class Algorithm:
         self.totalEdges = 0
         self.B = {}
         self.lock = RLock()
+        self.pool = set()
 
     def relax(self, w, x):
         """
@@ -39,6 +45,10 @@ class Algorithm:
         """
         # print("w=", w, "x=", x)
         # self.lock.acquire()
+        # while True:
+        # print(current_thread(), active_count())
+        #     break
+        # sleep(2)
         if x < self.property_map[w]:
             # check if there is an entry of w in the dictionary B
             if self.property_map[w] != self.infinity:
@@ -47,17 +57,17 @@ class Algorithm:
                     if floor(x / self.delta) != floor(self.property_map[w] / self.delta):
                         self.B[floor(self.property_map[w] / self.delta)].remove(w)
                 if floor(x / self.delta) not in self.B:
-                    self.B[floor(x / self.delta)] = [w]
+                    self.B[floor(x / self.delta)] = {w}
                 else:
                     if w not in self.B[floor(x / self.delta)]:
-                        self.B[floor(x / self.delta)].append(w)
+                        self.B[floor(x / self.delta)].add(w)
             # if the dictionary entry does not exist
             else:
                 if floor(x / self.delta) not in self.B:
-                    self.B[floor(x / self.delta)] = [w]
+                    self.B[floor(x / self.delta)] = {w}
                 else:
                     if w not in self.B[floor(x / self.delta)]:
-                        self.B[floor(x / self.delta)].append(w)
+                        self.B[floor(x / self.delta)].add(w)
 
             # update the property map
             self.property_map[w] = x
@@ -102,10 +112,19 @@ class Algorithm:
         :param request:
         :return:
         """
-        # t = Thread()
-        pool = set()
+        # pool = set()
         for key, value in request.items():
             t = Thread(target=self.relax, args=[key, value])
+<<<<<<< HEAD
+            t.start()
+            self.pool.add(t)
+            # self.relax(key, value)
+        # print(len(request))
+        # for thr in pool:
+        #     thr.start()
+        # for thr in pool:
+        #     thr.join()
+=======
             pool.add(t)
             t.start()
             # self.relax(key, value)
@@ -115,6 +134,7 @@ class Algorithm:
             print(thr.name)
             thr.join()
 
+>>>>>>> 888fa2338d2ab8474d6ed495c493475b62ca716c
     def delta_stepping(self, g):
         """
         This is the main function to implement the algorithm
@@ -149,6 +169,9 @@ class Algorithm:
             req = self.find_requests(r, 'heavy', g)
             self.relax_requests(req)
             ctr += 1
+        print(active_count())
+        for thr in self.pool:
+            thr.join()
 
     def validate(self, g):
         """
@@ -165,10 +188,10 @@ class Algorithm:
             return True
         else:
             print("Error: The algorithm is faulty!!!")
-            for i in range(1, len(p[0])):
-                if p[i] != self.property_map[i]:
+            for i in range(1, len(p)):
+                if p[i] != self.property_map.get(i, None):
                     print("vertex ", i, " value in ground truth is ", p[i], " and value in delta stepping is ",
-                          self.property_map[i])
+                          self.property_map.get(i, None))
             return False
 
 
@@ -192,7 +215,6 @@ def main():
     print("Delta Stepping Time")
     print(time.time())
     a.delta_stepping(g)
-    # print(g.dijkstra(a.source_vertex))
     print(time.time())
     print("\nValidating Solution..")
     if not a.validate(g):
