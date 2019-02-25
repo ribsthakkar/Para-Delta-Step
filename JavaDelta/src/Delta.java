@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Delta {
 	private int delta, source;
-	private HashMap<Integer, ArrayList<Node>> bucket;
+	private HashMap<Integer, ArrayList<Integer>> bucket;
 	public ArrayList<Node> property_map;
 	private Stack<Thread> pool;
 
@@ -23,11 +23,11 @@ public class Delta {
         the property map then, the vertex is removed from the bucket and reinserted in the new bucket
         x is the distance of the vertex and w is the index of the vertex in the property map
 	 */
-	public void relax(Node w, int x) {
+	public void relax(int w, int x) {
 //		System.out.println("Called relax with vertex " + w + " and weight " + x);
-		if (x < property_map.get(w)) {
-			if (property_map.get(w) != Integer.MAX_VALUE) {
-				int index = property_map.get(w) / delta;
+		if (x < property_map.get(w).getWeight()) {
+			if (property_map.get(w).getWeight() != Integer.MAX_VALUE) {
+				int index = property_map.get(w).getWeight() / delta;
 				if (bucket.get(index).contains(w)) {
 					int new_val = x / delta;
 					if (new_val != index) {
@@ -35,7 +35,7 @@ public class Delta {
 					}
 				} 
 				if (!bucket.containsKey(x / delta)) {
-					ArrayList<Node> w_list = new ArrayList<>();
+					ArrayList<Integer> w_list = new ArrayList<>();
 					w_list.add(w);
 					bucket.put(x / delta, w_list);
 				} else {
@@ -45,7 +45,7 @@ public class Delta {
 				}
 			} else {
 				if (!bucket.containsKey(x / delta)) {
-					ArrayList<Node> w_list = new ArrayList<>();
+					ArrayList<Integer> w_list = new ArrayList<>();
 					w_list.add(w);
 					bucket.put(x / delta, w_list);
 				} else {
@@ -54,7 +54,7 @@ public class Delta {
 					}
 				}
 			}
-			property_map.put(w, x);
+			property_map.get(w).setWeight(x);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class Delta {
 		for(int u: vertices) {
 			for(Node n: g.getAdjacentVertices(u).keySet()) {
 				int v = n.getID();
-				int edgeWeight = property_map.get(u) + g.getEdgeWeight(u, v);
+				int edgeWeight = property_map.get(u).getWeight() + g.getEdgeWeight(u, v);
 				if (kind.equals("light")) {
 					if(g.getEdgeWeight(u,v) <= delta) {
 						if(output.containsKey(v)) {
@@ -102,23 +102,16 @@ public class Delta {
 					relax(key, value);
 				}
 			};
-			pool.add(t);
+			pool.push(t);
 			t.start();
 
-		}
-		try {
-			while(!pool.isEmpty()) {
-				pool.pop().join();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 
 	public void delta_stepping(Graph g) {
 		for(Node node: g.getVertexList()) {
 			int n = node.getID();
-			property_map.put(n, Integer.MAX_VALUE);
+			property_map.get(n).setWeight(Integer.MAX_VALUE);
 		}
 
 		relax(source, 0);
@@ -138,6 +131,14 @@ public class Delta {
 			req = find_requests(r, "heavy", g);
 			relax_requests(req);
 			ctr += 1;
+		}
+
+		try {
+			while(!pool.isEmpty()) {
+				pool.pop().join();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 	
