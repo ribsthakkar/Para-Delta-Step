@@ -1,153 +1,96 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
-public class Graph<V> {
+public class Graph {
 
-	private HashMap<V, ArrayList<Edge<V>>> adjacencyList;
 
 	/**
 	 * This list holds all the vertices so that we can iterate over them in the
 	 * toString function
 	 */
-	private ArrayList<V> vertexList;
-
+	private ArrayList<Node> vertexList;
+	private HashMap<Integer, HashMap<Integer, Integer>> edgeList;
 	private boolean directed;
-	public int numEdges;
-	public int numNodes;
+	private int numEdges;
+	private int numNodes;
 
-	public Graph(boolean isDirected) {
+	public Graph(boolean isDirected, int nodes) {
 		directed = isDirected;
-		adjacencyList = new HashMap<V, ArrayList<Edge<V>>>();
-		vertexList = new ArrayList<V>();
-	}
-
-	private void updateValues() {
-		numNodes = vertexList.size();
-	}
-	public void add(V vertex, ArrayList<Edge<V>> connectedVertices) {
-		// Add the new vertex to the adjacencyList with it's list of connected
-		// nodes
-		adjacencyList.put(vertex, connectedVertices);
-		vertexList.add(vertex);
-		// If this is an undirected graph, every edge needs to represented
-		// twice, once in the added vertex's list and once in the list of each
-		// of the vertex's connected to the added vertex
-
-		for (Edge<V> vertexConnectedToAddedVertex : connectedVertices) {
-			ArrayList<Edge<V>> correspondingConnectedList = adjacencyList.get(vertexConnectedToAddedVertex.getVertex());
-			// The added vertex's connections might not be represented in
-			// the Graph yet, so we implicitly add them
-			if (correspondingConnectedList == null) {
-				adjacencyList.put(vertexConnectedToAddedVertex.getVertex(), new ArrayList<Edge<V>>());
-				vertexList.add(vertexConnectedToAddedVertex.getVertex());
-				correspondingConnectedList = adjacencyList.get(vertexConnectedToAddedVertex.getVertex());
-			}
-
-			if (!directed) {
-				// The weight from one vertex back to another in an undirected
-				// graph is equal
-				int weight = vertexConnectedToAddedVertex.getWeight();
-				correspondingConnectedList.add(new Edge<V>(vertex, weight));
-			}
+		edgeList = new HashMap<>();
+		vertexList = new ArrayList<>();
+		numNodes = nodes;
+		Node n;
+		for(int i = 0; i < numNodes + 1; i++) {
+			n = new Node(i);
+			vertexList.add(n);
 		}
-		updateValues();
 	}
 
-	public boolean addArc(V source, V end, int weight) {
+	public void addArc(int source, int end, int weight) {
 		if (!directed) {
-			return false;
+			return;
 		}
-
-		if (!adjacencyList.containsKey(source)) {
-			ArrayList<Edge<V>> tempList = new ArrayList<Edge<V>>();
-			tempList.add(new Edge<V>(end, weight));
-			add(source, tempList);
-			return true;
-		}
-
-		if (!adjacencyList.containsKey(end)) {
-			ArrayList<Edge<V>> tempList = new ArrayList<Edge<V>>();
-			add(end, tempList);
-		}
-
-		adjacencyList.get(source).add(new Edge<V>(end, weight));
-		numEdges++;
-		updateValues();
-		return true;
-	}
-
-	public boolean addEdge(V vertexOne, V vertexTwo, int weight) {
-		if (directed) {
-			return false;
-		}
-
-		if (!adjacencyList.containsKey(vertexOne)) {
-			ArrayList<Edge<V>> tempList = new ArrayList<Edge<V>>();
-			tempList.add(new Edge<V>(vertexTwo, weight));
-			add(vertexOne, tempList);
-			return true;
-		}
-
-		if (!adjacencyList.containsKey(vertexTwo)) {
-			ArrayList<Edge<V>> tempList = new ArrayList<Edge<V>>();
-			tempList.add(new Edge<V>(vertexOne, weight));
-			add(vertexTwo, tempList);
-			return true;
-		}
-
-		adjacencyList.get(vertexOne).add(new Edge<V>(vertexTwo, weight));
-		adjacencyList.get(vertexTwo).add(new Edge<V>(vertexOne, weight));
-		numEdges++;
-		updateValues();
-		return true;
-	}
-
-	/**
-	 * This method returns a list of all adjacent vertices of the give vertex
-	 * without weight
-	 *
-	 * @param vertex the source vertex
-	 * @return an array list containing the vertices
-	 */
-	public ArrayList<V> getAdjacentVertices(V vertex) {
-		ArrayList<V> returnList = new ArrayList<V>();
-		for (Edge<V> edge : adjacencyList.get(vertex)) {
-			returnList.add(edge.getVertex());
-		}
-		return returnList;
-	}
-
-	public double getDistanceBetween(V source, V end) {
-		for (Edge<V> edge : adjacencyList.get(source)) {
-			if (edge.getVertex() == end) {
-				return edge.getWeight();
+		vertexList.get(source).addEdge(vertexList.get(end), weight);
+		if(edgeList.containsKey(source)) {
+			Map<Integer, Integer> m = edgeList.get(source);
+			if(m.containsKey(end) && m.get(end) < weight) {
+				m.put(end, weight);
+			} else {
+				m.put(end, weight);
 			}
+		} else {
+			HashMap<Integer, Integer> m = new HashMap<>();
+			m.put(end, weight);
+			edgeList.put(source, m);
 		}
-		return Double.POSITIVE_INFINITY;
 	}
 
-	public ArrayList<V> getVertexList() {
+	public void unmarkAll() {
+		for(Node n: vertexList) {
+			n.unmark();
+		}
+	}
+	public ArrayList<Node> nodes() {
 		return vertexList;
 	}
-
-	public String toString() {
-		String s = "";
-		for (V vertex : vertexList) {
-			s += vertex.toString();
-			s += " : ";
-			s += adjacencyList.get(vertex);
-			s += "\n";
-		}
-		return s;
+	public HashMap<Node, Integer> getAdjacentVertices(int source) {
+		return vertexList.get(source).getAdjacent();
 	}
 
-	public int getEdgeWeight(V source, V dest) {
-		ArrayList<Edge<V>> e = adjacencyList.get(source);
-		for(Edge ed: e) {
-			if (ed.getVertex().equals(dest)) {
-				return ed.getWeight();
+	public HashMap<Integer, Integer> dijsktra(int source) {
+		PriorityQueue<Node> q = new PriorityQueue<>();
+		q.add(vertexList.get(source));
+		vertexList.get(source).setWeight(0);
+		Node current;
+		while(!q.isEmpty()) {
+			current = q.remove();
+			if(current.isVisited()) {
+				continue;
+			}
+			current.mark();
+			for(Node adjacent:current.getAdjacent().keySet()) {
+				int weight = current.getAdjacent().get(adjacent);
+				if(!adjacent.isVisited()) {
+					if(adjacent.getWeight() > current.getWeight() + weight) {
+						adjacent.setWeight(current.getWeight() + weight);
+					}
+					q.add(adjacent);
+				}
 			}
 		}
-		return -1;
+		unmarkAll();
+		HashMap<Integer, Integer> out = new HashMap<>();
+		for(int i = 0; i < numNodes + 1; i ++) {
+			out.put(i, vertexList.get(i).getWeight());
+			vertexList.get(i).setWeight(Integer.MAX_VALUE);
+		}
+		return out;
+	}
+
+	public int getEdgeWeight(int source, int dest) {
+		return edgeList.get(source).get(dest);
+	}
+
+	public ArrayList<Node> getVertexList() {
+		return vertexList;
 	}
 }
