@@ -28,12 +28,12 @@ public class Main {
 
 		System.out.println(graph.toString());
 
-		Delta d = new Delta(5, 5, );
+		Delta d = new Delta(5, 5, graph.getVertexList());
 		long totalTime = 0;
 		long dTotalTime = 0;
 		long startTime;
 		long endTime;
-		for(int i = 0; i < 10000000; i ++) {
+		for(int i = 0; i < 100; i ++) {
 			startTime = System.nanoTime();
 			d.delta_stepping(graph);
 			endTime = System.nanoTime();
@@ -43,27 +43,28 @@ public class Main {
 			HashMap<Integer, Integer> dij = graph.dijsktra(5);
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
-			for(int node:d.property_map.keySet()) {
-				int out = dij.get(node);
-				int other = d.property_map.get(node);
-				if(out != other) {
-					System.out.println("Incorrect execution");
-					System.out.println("Dijkstra gave " + out);
-					System.out.println("Delta gave " + other);
-				}
-			}
+//			for(Node node:d.property_map) {
+//				int out = dij.get(node.getID());
+//				int other = d.property_map.get(node.getID()).getWeight();
+//				if(out != other) {
+//					System.out.println("Incorrect execution");
+//					System.out.println("Dijkstra gave " + out);
+//					System.out.println("Delta gave " + other);
+//				}
+//			}
 
 		}
-		long time = (totalTime) / 10000000;
-		long dTime = (dTotalTime) / 10000000;
+		long time = (totalTime) / 100;
+		long dTime = (dTotalTime) / 100;
 		System.out.printf("Delta takes Average %d nanoseconds\n", time);
 		System.out.printf("Dijkstra takes Average %d nanoseconds\n", dTime);
 //
 //		System.out.println(graph.dijsktra(5));
+//
 //		d.delta_stepping(graph);
 //
-//		for(int node:d.property_map.keySet()) {
-//			System.out.println("Cost to Node " + node + " is "+ d.property_map.get(node));
+//		for(Node node:d.property_map) {
+//			System.out.println("Cost to Node " + node + " is "+ node.getWeight());
 //		}
 	}
 }
