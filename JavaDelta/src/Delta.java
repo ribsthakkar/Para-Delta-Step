@@ -1,4 +1,3 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.*;
@@ -106,6 +105,14 @@ public class Delta {
 			t.start();
 
 		}
+		
+		try {
+			while(!pool.isEmpty()) {
+				pool.pop().join();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void delta_stepping(Graph g) {
@@ -133,13 +140,6 @@ public class Delta {
 			ctr += 1;
 		}
 
-		try {
-			while(!pool.isEmpty()) {
-				pool.pop().join();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	
