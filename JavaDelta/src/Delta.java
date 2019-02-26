@@ -105,7 +105,7 @@ public class Delta {
 			t.start();
 
 		}
-		
+
 		try {
 			while(!pool.isEmpty()) {
 				pool.pop().join();
@@ -115,7 +115,7 @@ public class Delta {
 		}
 	}
 
-	public void delta_stepping(Graph g) {
+	public HashMap<Integer, Integer> delta_stepping(Graph g) {
 		for(Node node: g.getVertexList()) {
 			int n = node.getID();
 			property_map.get(n).setWeight(Integer.MAX_VALUE);
@@ -125,21 +125,32 @@ public class Delta {
 		HashMap<Integer, Integer> req;
 		int ctr = 0;
 		while(bucket.size() > 0) {
-			int i = Collections.min(bucket.keySet());
-			int sub_ctr = 0;
-			ArrayList<Integer> r = new ArrayList<>();
-			while(bucket.containsKey(i)) {
-				req = find_requests(bucket.get(i), "light", g);
-				r.addAll(bucket.get(i));
-				bucket.remove(i);
+			try {
+				int i = Collections.min(bucket.keySet());
+				int sub_ctr = 0;
+				ArrayList<Integer> r = new ArrayList<>();
+				while(bucket.containsKey(i)) {
+					req = find_requests(bucket.get(i), "light", g);
+					r.addAll(bucket.get(i));
+					bucket.remove(i);
+					relax_requests(req);
+					sub_ctr +=1;
+				}
+				req = find_requests(r, "heavy", g);
 				relax_requests(req);
-				sub_ctr +=1;
+				ctr += 1;
+			} catch (NoSuchElementException e) {
+				System.out.println(e);
+				return null;
 			}
-			req = find_requests(r, "heavy", g);
-			relax_requests(req);
-			ctr += 1;
-		}
 
+		}
+		HashMap<Integer, Integer> out = new HashMap<>();
+		for(int i = 0; i < g.nodes().size(); i ++) {
+			out.put(i, g.getVertexList().get(i).getWeight());
+			g.getVertexList().get(i).setWeight(Integer.MAX_VALUE);
+		}
+		return out;
 	}
 	
 	

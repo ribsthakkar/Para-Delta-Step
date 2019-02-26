@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Graph {
 
@@ -8,14 +9,14 @@ public class Graph {
 	 * toString function
 	 */
 	private ArrayList<Node> vertexList;
-	private HashMap<Integer, HashMap<Integer, Integer>> edgeList;
+	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> edgeList;
 	private boolean directed;
 	private int numEdges;
 	private int numNodes;
 
 	public Graph(boolean isDirected, int nodes) {
 		directed = isDirected;
-		edgeList = new HashMap<>();
+		edgeList = new ConcurrentHashMap<>();
 		vertexList = new ArrayList<>();
 		numNodes = nodes;
 		Node n;
@@ -38,7 +39,7 @@ public class Graph {
 				m.put(end, weight);
 			}
 		} else {
-			HashMap<Integer, Integer> m = new HashMap<>();
+			ConcurrentHashMap<Integer, Integer> m = new ConcurrentHashMap<>();
 			m.put(end, weight);
 			edgeList.put(source, m);
 		}
