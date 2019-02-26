@@ -1,17 +1,19 @@
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Delta {
 	private int delta, source;
-	private HashMap<Integer, ArrayList<Integer>> bucket;
+	private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Integer>> bucket;
 	public ArrayList<Node> property_map;
 	private Stack<Thread> pool;
 
 	public Delta(int d, int source, ArrayList<Node> vertices) {
 		this.source = source;
 		delta = d;
-		bucket = new HashMap<>();
+		bucket = new ConcurrentHashMap<>();
 		property_map = vertices;
 		pool = new Stack<>();
 
@@ -34,7 +36,7 @@ public class Delta {
 					}
 				} 
 				if (!bucket.containsKey(x / delta)) {
-					ArrayList<Integer> w_list = new ArrayList<>();
+					CopyOnWriteArrayList<Integer> w_list = new CopyOnWriteArrayList<Integer>();
 					w_list.add(w);
 					bucket.put(x / delta, w_list);
 				} else {
@@ -44,7 +46,7 @@ public class Delta {
 				}
 			} else {
 				if (!bucket.containsKey(x / delta)) {
-					ArrayList<Integer> w_list = new ArrayList<>();
+					CopyOnWriteArrayList<Integer> w_list = new CopyOnWriteArrayList<Integer>();
 					w_list.add(w);
 					bucket.put(x / delta, w_list);
 				} else {
@@ -57,7 +59,7 @@ public class Delta {
 		}
 	}
 
-	public HashMap<Integer, Integer> find_requests(ArrayList<Integer> vertices, String kind, Graph g) {
+	public HashMap<Integer, Integer> find_requests(CopyOnWriteArrayList<Integer> vertices, String kind, Graph g) {
 		HashMap<Integer, Integer> output = new HashMap<>();
 		for(int u: vertices) {
 			for(Node n: g.getAdjacentVertices(u).keySet()) {
@@ -128,7 +130,7 @@ public class Delta {
 			try {
 				int i = Collections.min(bucket.keySet());
 				int sub_ctr = 0;
-				ArrayList<Integer> r = new ArrayList<>();
+				CopyOnWriteArrayList<Integer> r = new CopyOnWriteArrayList<Integer>();
 				while(bucket.containsKey(i)) {
 					req = find_requests(bucket.get(i), "light", g);
 					r.addAll(bucket.get(i));

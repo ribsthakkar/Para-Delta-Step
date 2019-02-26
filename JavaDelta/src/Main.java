@@ -8,7 +8,7 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 
-		int TESTS = 1000000;
+		int TESTS = 100000;
 		System.out.println("Hello World!");
 
 

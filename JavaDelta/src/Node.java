@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Node implements Comparable<Node> {
 
-    private int weight;
+    private AtomicInteger weight;
     private int id;
     private boolean visit;
     private HashMap<Node, Integer> adjacent;
@@ -16,7 +17,7 @@ public class Node implements Comparable<Node> {
         this.id = id;
         visit = false;
         adjacent = new HashMap<>();
-        weight = Integer.MAX_VALUE;
+        weight = new AtomicInteger(Integer.MAX_VALUE);
     }
 
     public void addEdge(Node other, int weight) {
@@ -37,20 +38,20 @@ public class Node implements Comparable<Node> {
         return adjacent;
     }
     public void setWeight(int weight) {
-        this.weight = weight;
+        this.weight.set(weight);
     }
     public boolean isVisited() {
         return visit;
     }
     public int getWeight() {
-        return weight;
+        return weight.get();
     }
     public int getID() {
         return id;
     }
     @Override
     public int compareTo(Node o) {
-        return this.weight - o.weight;
+        return this.weight.get() - o.weight.get();
     }
 
     @Override
