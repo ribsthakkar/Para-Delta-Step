@@ -9,14 +9,14 @@ public class Graph {
 	 * toString function
 	 */
 	private ArrayList<Node> vertexList;
-	private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> edgeList;
+	private HashMap<Integer, HashMap<Integer, Integer>> edgeList;
 	private boolean directed;
 	private int numEdges;
 	private int numNodes;
 
 	public Graph(boolean isDirected, int nodes) {
 		directed = isDirected;
-		edgeList = new ConcurrentHashMap<>();
+		edgeList = new HashMap<>();
 		vertexList = new ArrayList<>();
 		numNodes = nodes;
 		Node n;
@@ -25,7 +25,13 @@ public class Graph {
 			vertexList.add(n);
 		}
 	}
+	public Graph(boolean isDirected) {
+		directed = isDirected;
+		edgeList = new HashMap<>();
+		vertexList = new ArrayList<>();
+		numNodes = 0;
 
+	}
 	public void addArc(int source, int end, int weight) {
 		if (!directed) {
 			return;
@@ -39,7 +45,7 @@ public class Graph {
 				m.put(end, weight);
 			}
 		} else {
-			ConcurrentHashMap<Integer, Integer> m = new ConcurrentHashMap<>();
+			HashMap<Integer, Integer> m = new HashMap<>();
 			m.put(end, weight);
 			edgeList.put(source, m);
 		}
@@ -71,8 +77,8 @@ public class Graph {
 			for(Node adjacent:current.getAdjacent().keySet()) {
 				int weight = current.getAdjacent().get(adjacent);
 				if(!adjacent.isVisited()) {
-					if(adjacent.getWeight() > current.getWeight() + weight) {
-						adjacent.setWeight(current.getWeight() + weight);
+					if(adjacent.getWeight().get() > current.getWeight().get() + weight) {
+						adjacent.setWeight(current.getWeight().get() + weight);
 					}
 					q.add(adjacent);
 				}
@@ -81,7 +87,7 @@ public class Graph {
 		unmarkAll();
 		HashMap<Integer, Integer> out = new HashMap<>();
 		for(int i = 0; i < numNodes + 1; i ++) {
-			out.put(i, vertexList.get(i).getWeight());
+			out.put(i, vertexList.get(i).getWeight().get());
 			vertexList.get(i).setWeight(Integer.MAX_VALUE);
 		}
 		return out;
@@ -93,5 +99,22 @@ public class Graph {
 
 	public ArrayList<Node> getVertexList() {
 		return vertexList;
+	}
+
+	public void addStringArc(String s) {
+		String[] arr = s.split("\\s+");
+		if(arr[0].equals("p")) {
+			numNodes = Integer.parseInt(arr[2]);
+			Node n;
+			for(int i = 0; i < numNodes + 1; i++) {
+				n = new Node(i);
+				vertexList.add(n);
+			}
+		} else if(arr[0].equals("a")){
+			int source = Integer.parseInt(arr[1]);
+			int dest = Integer.parseInt(arr[2]);
+			int weight = Integer.parseInt(arr[3]);
+			addArc(source, dest, weight);
+		}
 	}
 }

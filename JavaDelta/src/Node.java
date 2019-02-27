@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Node implements Comparable<Node> {
 
@@ -12,12 +13,14 @@ public class Node implements Comparable<Node> {
     private int id;
     private boolean visit;
     private HashMap<Node, Integer> adjacent;
+    private ReentrantLock lock;
 
     public Node(int id) {
         this.id = id;
         visit = false;
         adjacent = new HashMap<>();
         weight = new AtomicInteger(Integer.MAX_VALUE);
+        lock = new ReentrantLock();
     }
 
     public void addEdge(Node other, int weight) {
@@ -38,13 +41,15 @@ public class Node implements Comparable<Node> {
         return adjacent;
     }
     public void setWeight(int weight) {
+//        System.out.println("HERE");
+//        System.out.println(this.weight.get());
         this.weight.set(weight);
     }
     public boolean isVisited() {
         return visit;
     }
-    public int getWeight() {
-        return weight.get();
+    public AtomicInteger getWeight() {
+        return weight;
     }
     public int getID() {
         return id;
