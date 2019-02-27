@@ -79,6 +79,7 @@ public class Graph {
 				if(!adjacent.isVisited()) {
 					if(adjacent.getWeight().get() > current.getWeight().get() + weight) {
 						adjacent.setWeight(current.getWeight().get() + weight);
+						adjacent.setPrev(current);
 					}
 					q.add(adjacent);
 				}
@@ -115,6 +116,25 @@ public class Graph {
 			int dest = Integer.parseInt(arr[2]);
 			int weight = Integer.parseInt(arr[3]);
 			addArc(source, dest, weight);
+		}
+	}
+	public Stack<Node> getPath(int source) {
+		Stack<Node> out = new Stack<>();
+		out.push(vertexList.get(source));
+		Node s = vertexList.get(source);
+		int count = 0;
+		while(s.getPrev().get() != null && count < 10) {
+			out.push(s.getPrev().get());
+			s = s.getPrev().get();
+			count++;
+		}
+
+		return out;
+	}
+
+	public void resetPrev() {
+		for(int i = 0; i < numNodes + 1; i ++) {
+			vertexList.get(i).setPrev(null);
 		}
 	}
 }

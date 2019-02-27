@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args)  {
 
-		int TESTS = 10;
+		int TESTS = 1;
 		System.out.println("Hello World!");
 		Graph graph;
 		String fileName = "wiki.dimacs";
@@ -43,16 +43,26 @@ public class Main {
 		long startTime;
 		long endTime;
 		for(int i = 0; i < TESTS; i ++) {
+			graph.resetPrev();
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> dij = graph.dijsktra(5);
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
+			for(Node n: graph.getVertexList() ) {
+				System.out.println(graph.getPath(n.getID()));
+			}
 
+			graph.resetPrev();
 			Delta d = new Delta(10, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
 			totalTime += endTime - startTime;
+
+			for(Node n: graph.getVertexList() ) {
+				System.out.println(graph.getPath(n.getID()));
+			}
+
 			int count = 0;
 			if(delt != null && dij != null) {
 				if (!delt.equals(dij)) {
@@ -62,8 +72,9 @@ public class Main {
 						int out = dij.get(node);
 						int other = delt.get(node);
 						if (out != other) {
-//							System.out.println("Dijkstra gave " + out);
-//							System.out.println("Delta gave " + other);
+							System.out.println("For node #" + node);
+							System.out.println("Dijkstra gave " + out);
+							System.out.println("Delta gave " + other);
 							count++;
 						}
 					}
@@ -72,13 +83,16 @@ public class Main {
 //			System.out.println(i);
  			System.out.println("We had " + count + " nodes with errors;");
 		}
+
 		long time = (totalTime) / TESTS;
 		long dTime = (dTotalTime) / TESTS;
 		System.out.printf("Delta takes Average %d nanoseconds\n", time);
 		System.out.printf("Dijks takes Average %d nanoseconds\n", dTime);
 //
-//		System.out.println(graph.dijsktra(5));
-//
+		System.out.println(graph.dijsktra(5));
+		for(Node n: graph.getVertexList() ) {
+			System.out.println(graph.getPath(n.getID()));
+		}
 //		d.delta_stepping(graph);
 //
 //		for(Node node:d.property_map) {

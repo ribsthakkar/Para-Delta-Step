@@ -1,4 +1,5 @@
 import com.sun.javaws.exceptions.InvalidArgumentException;
+import javafx.util.Pair;
 import org.omg.PortableInterceptor.INACTIVE;
 
 import java.util.*;
@@ -25,23 +26,25 @@ public class Delta {
 
 	}
 
-	private boolean GreaterThanCAS(int w, int newValue) {
+	private boolean GreaterThanCAS(int node, int newValue, Node prev) {
 		while(true) {
-			int local = property_map.get(w).getWeight().get();
+			int local = property_map.get(node).getWeight().get();
+			Node pLocal = property_map.get(node).getPrev().get();
 			if(newValue >= local) {
 				return false; // swap failed
 			}
-			if (property_map.get(w).getWeight().compareAndSet(local, newValue)) {
+			if (property_map.get(node).getWeight().compareAndSet(local, newValue) && property_map.get(node).getPrev().compareAndSet(pLocal, prev)) {
+
 				int i = local / delta;
 				if(bucket.containsKey(i)) {
-					bucket.get(i).remove(property_map.get(w));
+					bucket.get(i).remove(property_map.get(node));
 				}
 				int n = newValue / delta;
 				if(bucket.containsKey(n)) {
-					bucket.get(n).add(property_map.get(w));
+					bucket.get(n).add(property_map.get(node));
 				} else {
 					HashSet<Node> a = new HashSet<>();
-					a.add(property_map.get(w));
+					a.add(property_map.get(node));
 					bucket.put(n, a);
 				}
 				return true;  // swap successful }
@@ -65,7 +68,7 @@ public class Delta {
         the property map then, the vertex is removed from the bucket and reinserted in the new bucket
         x is the distance of the vertex and w is the index of the vertex in the property map
 	 */
-	public void relax(int w, int x) {
+	public void relax(int w, int x, Node prev) {
 //		 System.out.println("Called relax with vertex " + w + " and weight " + x);
 //		if (GreaterThanCAS(w, x)) {
 //			if (LessThanCAS(w, Integer.MAX_VALUE)) {
@@ -97,7 +100,7 @@ public class Delta {
 //			}
 ////			property_map.get(w).setWeight(x);
 //		}
-		GreaterThanCAS(w, x);
+		GreaterThanCAS(w, x, prev);
 
 	}
 
@@ -156,12 +159,12 @@ public class Delta {
 //		}
 //	}
 
-	public void relax_requests(HashMap<Node, HashSet<Integer>> req) {
+	public void relax_requests(HashMap<Pair<Node,Node>, HashSet<Integer>> req) {
 		pool = new HashSet<>();
-		for(Node n: req.keySet()) {
+		for(Pair<Node,Node> n: req.keySet()) {
 			HashSet<Integer> weights = req.get(n);
 			for (int w: weights) {
-				Thread t = new Thread(() -> relax(n.getID(),w));
+				Thread t = new Thread(() -> relax(n.getValue().getID(), w,n.getKey() ));
 				pool.add(t);
 				t.start();
 			}
@@ -175,16 +178,17 @@ public class Delta {
 		}
 	}
 
-	public void relax_requests_s(HashMap<Node, HashSet<Integer>> req) {
+	public void relax_requests_s(HashMap<Pair<Node,Node>, HashSet<Integer>> req) {
 		pool = new HashSet<>();
-		for(Node n: req.keySet()) {
+		for(Pair<Node,Node> n: req.keySet()) {
 			HashSet<Integer> weights = req.get(n);
 			for (int w: weights) {
-				relax(n.getID(), w);
+				relax(n.getValue().getID(), w,n.getKey());
 			}
 		}
 	}
 	public HashMap<Integer, Integer> delta_stepping(Graph g) {
+		//Splitting Adjacency list to heavy and light edges for each node
 		for(Node node: g.getVertexList()) {
 			int n = node.getID();
 			property_map.get(n).setWeight(Integer.MAX_VALUE);
@@ -210,7 +214,7 @@ public class Delta {
 		}
 //		System.out.println(light.size());
 //		System.out.println(heavy.size());
-		relax(source, 0);
+		relax(source, 0, null);
 		int ctr = 0;
 		while(bucket.size() > 0) {
 			Set<Node> s = new ConcurrentSkipListSet<>();
@@ -229,7 +233,7 @@ public class Delta {
 //				relax_requests(req);
 //				ctr += 1;
 			int in = Collections.min(bucket.keySet());
-			HashMap<Node, HashSet<Integer>> requests = new HashMap<>();
+			HashMap<Pair<Node,Node>, HashSet<Integer>> requests = new HashMap<>();
 			while(!bucket.get(in).isEmpty()) {
 				for (Node v: bucket.get(in)) {
 					HashSet<Node> ladj = light.remove(v);
@@ -262,16 +266,17 @@ public class Delta {
 		return out;
 	}
 
-	private void setupRequests(Graph g, HashMap<Node, HashSet<Integer>> requests, Node v, HashSet<Node> adj) {
+	private void setupRequests(Graph g, HashMap<Pair<Node, Node>, HashSet<Integer>> requests, Node v, HashSet<Node> adj) {
 		for(Node w: adj) {
-			if (requests.containsKey(w)) {
-				requests.get(w).add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
+			if (requests.containsKey(new Pair<>(v, w))) {
+				requests.get(new Pair<>(v, w)).add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
 			} else {
 				HashSet<Integer> a = new HashSet<>();
 				a.add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
-				requests.put(w, a);
+				requests.put(new Pair<>(v, w), a);
 			}
 		}
 	}
+
 
 }

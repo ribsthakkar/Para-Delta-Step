@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Node implements Comparable<Node> {
@@ -14,6 +15,7 @@ public class Node implements Comparable<Node> {
     private boolean visit;
     private HashMap<Node, Integer> adjacent;
     private ReentrantLock lock;
+    private AtomicReference<Node> prev;
 
     public Node(int id) {
         this.id = id;
@@ -21,6 +23,7 @@ public class Node implements Comparable<Node> {
         adjacent = new HashMap<>();
         weight = new AtomicInteger(Integer.MAX_VALUE);
         lock = new ReentrantLock();
+        prev = new AtomicReference<>(null);
     }
 
     public void addEdge(Node other, int weight) {
@@ -45,6 +48,17 @@ public class Node implements Comparable<Node> {
 //        System.out.println(this.weight.get());
         this.weight.set(weight);
     }
+    public void setPrev(Node prev) {
+//        System.out.println("I am " + this);
+//        System.out.println("Original prev is " + this.prev.get());
+//        System.out.println("New prev is " + prev);
+        this.prev.set(prev);
+
+    }
+
+    public AtomicReference<Node> getPrev() {
+        return prev;
+    }
     public boolean isVisited() {
         return visit;
     }
@@ -56,7 +70,13 @@ public class Node implements Comparable<Node> {
     }
     @Override
     public int compareTo(Node o) {
-        return this.weight.get() - o.weight.get();
+        if(this.weight.get() < o.weight.get()) {
+            return -1;
+        } else if(this.weight.get() > o.weight.get()) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     @Override
