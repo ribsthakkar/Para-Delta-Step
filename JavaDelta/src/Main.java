@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args)  {
 
-		int TESTS = 10000;
+		int TESTS = 10;
 		System.out.println("Hello World!");
 		Graph graph;
 		String fileName = "wiki.dimacs";
@@ -70,7 +70,7 @@ public class Main {
 				}
 			}
 //			System.out.println(i);
-// 			System.out.println("We had " + count + " nodes with errors;");
+ 			System.out.println("We had " + count + " nodes with errors;");
 		}
 		long time = (totalTime) / TESTS;
 		long dTime = (dTotalTime) / TESTS;

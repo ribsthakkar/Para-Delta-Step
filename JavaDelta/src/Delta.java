@@ -65,7 +65,7 @@ public class Delta {
         the property map then, the vertex is removed from the bucket and reinserted in the new bucket
         x is the distance of the vertex and w is the index of the vertex in the property map
 	 */
-	public synchronized void relax(int w, int x) {
+	public void relax(int w, int x) {
 //		 System.out.println("Called relax with vertex " + w + " and weight " + x);
 //		if (GreaterThanCAS(w, x)) {
 //			if (LessThanCAS(w, Integer.MAX_VALUE)) {
@@ -161,7 +161,6 @@ public class Delta {
 		for(Node n: req.keySet()) {
 			HashSet<Integer> weights = req.get(n);
 			for (int w: weights) {
-				relax(n.getID(), w);
 				Thread t = new Thread(() -> relax(n.getID(),w));
 				pool.add(t);
 				t.start();
@@ -173,6 +172,16 @@ public class Delta {
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void relax_requests_s(HashMap<Node, HashSet<Integer>> req) {
+		pool = new HashSet<>();
+		for(Node n: req.keySet()) {
+			HashSet<Integer> weights = req.get(n);
+			for (int w: weights) {
+				relax(n.getID(), w);
+			}
 		}
 	}
 	public HashMap<Integer, Integer> delta_stepping(Graph g) {

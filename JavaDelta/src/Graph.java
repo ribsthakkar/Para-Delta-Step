@@ -41,7 +41,7 @@ public class Graph {
 			Map<Integer, Integer> m = edgeList.get(source);
 			if(m.containsKey(end) && m.get(end) < weight) {
 				m.put(end, weight);
-			} else {
+			} else if(!m.containsKey(end)) {
 				m.put(end, weight);
 			}
 		} else {
