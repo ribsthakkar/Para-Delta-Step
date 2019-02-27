@@ -195,11 +195,12 @@ public class Delta {
 						HashSet<Node> nodes = new HashSet<>();
 						nodes.add(dest);
 						light.put(node, nodes);
-					}				}
+					}
+				}
 			}
 		}
-		System.out.println(light.size());
-		System.out.println(heavy.size());
+//		System.out.println(light.size());
+//		System.out.println(heavy.size());
 		relax(source, 0);
 		int ctr = 0;
 		while(bucket.size() > 0) {

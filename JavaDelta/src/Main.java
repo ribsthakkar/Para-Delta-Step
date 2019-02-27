@@ -9,10 +9,10 @@ public class Main {
 
 	public static void main(String[] args)  {
 
-		int TESTS = 1;
+		int TESTS = 10000;
 		System.out.println("Hello World!");
 		Graph graph;
-		String fileName = "road-NY.dimacs";
+		String fileName = "wiki.dimacs";
 		graph = new Graph(true);
 		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 			stream.forEach(graph::addStringArc);
@@ -48,7 +48,7 @@ public class Main {
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
 
-			Delta d = new Delta(1, 5, graph.getVertexList());
+			Delta d = new Delta(10, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
@@ -70,7 +70,7 @@ public class Main {
 				}
 			}
 //			System.out.println(i);
- 			System.out.println("We had " + count + " nodes with errors;");
+// 			System.out.println("We had " + count + " nodes with errors;");
 		}
 		long time = (totalTime) / TESTS;
 		long dTime = (dTotalTime) / TESTS;
