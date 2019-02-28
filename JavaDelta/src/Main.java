@@ -10,26 +10,6 @@ public class Main {
 	public static void main(String[] args)  {
 		System.out.println("Hello World!");
 		int TESTS = 1;
-
-//		graph = new Graph(true, 7);
-//
-//		graph.addArc(1, 2, 2);
-//
-//		graph.addArc(1, 3, 12);
-//
-//		graph.addArc(1, 4, 7);
-//
-//		graph.addArc(3, 2, 1);
-//
-//		graph.addArc(5, 6, 4);
-//
-//		graph.addArc(5, 7, 5);
-//
-//		graph.addArc(4, 5, 1);
-//
-//		graph.addArc(6, 4, 1);
-//
-//		graph.addArc(5, 1, 1);
 		long totalTime = 0;
 		long dTotalTime = 0;
 		long startTime;
@@ -84,18 +64,10 @@ public class Main {
 		System.out.printf("Delta takes Average %d nanoseconds\n", time);
 		System.out.printf("Dijks takes Average %d nanoseconds\n", dTime);
 
-//		System.out.println(graph.dijsktra(5));
-//		graph.dijsktra(5);
-//		for(Node n: graph.getVertexList() ) {
-//			if(n.getID() == 73) {
-//				System.out.println(graph.getPath(n.getID()));
-//				System.out.println(graph.getPathCost(n.getID()));
-//			}
-//		}
+		}
 //		d.delta_stepping(graph);
 //
 //		for(Node node:d.property_map) {
 //			System.out.println("Cost to Node " + node + " is "+ node.getWeight());
 //		}
 	}
-}
