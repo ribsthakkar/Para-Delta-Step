@@ -1,6 +1,4 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.util.Pair;
-import org.omg.PortableInterceptor.INACTIVE;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +16,7 @@ public class Delta {
 	public Delta(int d, int source, ArrayList<Node> vertices) {
 		this.source = source;
 		delta = d;
-		bucket = new HashMap<>();
+		bucket = new ConcurrentHashMap<>();
 		property_map = vertices;
 		pool = new HashSet<>();
 		light = new HashMap<>();
@@ -42,23 +40,12 @@ public class Delta {
 				if(bucket.containsKey(n)) {
 					bucket.get(n).add(property_map.get(node));
 				} else {
-					Set<Node> a = new HashSet<>();
+					Set<Node> a = new ConcurrentSkipListSet<>();
 					a.add(property_map.get(node));
 					bucket.put(n, a);
 				}
 				return true;  // swap successful }
 			}
-			// keep trying
-		}
-	}
-
-	private boolean LessThanCAS(int w, int newValue) {
-		while(true) {
-			int local = property_map.get(w).getWeight().get();
-			if(newValue != local) {
-				return false; // swap failed
-			}
-			return true;
 			// keep trying
 		}
 	}

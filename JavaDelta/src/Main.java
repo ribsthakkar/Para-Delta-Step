@@ -8,17 +8,9 @@ import java.util.stream.Stream;
 public class Main {
 
 	public static void main(String[] args)  {
-
-		int TESTS = 1;
 		System.out.println("Hello World!");
-		Graph graph;
-		String fileName = "road-NY.dimacs";
-		graph = new Graph(true);
-		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
-			stream.forEach(graph::addStringArc);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		int TESTS = 1;
+
 //		graph = new Graph(true, 7);
 //
 //		graph.addArc(1, 2, 2);
@@ -43,6 +35,14 @@ public class Main {
 		long startTime;
 		long endTime;
 		for(int i = 0; i < TESTS; i ++) {
+			Graph graph;
+			String fileName = "road-NY.dimacs";
+			graph = new Graph(true);
+			try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+				stream.forEach(graph::addStringArc);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			graph.resetPrev();
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> dij = graph.dijsktra(5);
