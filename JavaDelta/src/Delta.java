@@ -9,27 +9,26 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Delta {
 	private int delta, source;
-	private ConcurrentHashMap<Integer, HashSet<Node>> bucket;
-	private ConcurrentHashMap<Node, HashSet<Node>> light;
-	private ConcurrentHashMap<Node,HashSet<Node>> heavy;
+	private Map<Integer, Set<Node>> bucket;
+	private Map<Node, HashSet<Node>> light;
+	private Map<Node,HashSet<Node>> heavy;
 	public ArrayList<Node> property_map;
 	private Set<Thread> pool;
 
 	public Delta(int d, int source, ArrayList<Node> vertices) {
 		this.source = source;
 		delta = d;
-		bucket = new ConcurrentHashMap<>();
+		bucket = new HashMap<>();
 		property_map = vertices;
 		pool = new HashSet<>();
-		light = new ConcurrentHashMap<>();
-		heavy = new ConcurrentHashMap<>();
+		light = new HashMap<>();
+		heavy = new HashMap<>();
 
 	}
 
 	private boolean GreaterThanCAS(int node, int newValue, Node prev) {
 		while(true) {
 			int local = property_map.get(node).getWeight().get();
-			Node pLocal = property_map.get(node).getPrev().get();
 			if(newValue >= local) {
 				return false; // swap failed
 			}
@@ -43,7 +42,7 @@ public class Delta {
 				if(bucket.containsKey(n)) {
 					bucket.get(n).add(property_map.get(node));
 				} else {
-					HashSet<Node> a = new HashSet<>();
+					Set<Node> a = new HashSet<>();
 					a.add(property_map.get(node));
 					bucket.put(n, a);
 				}
@@ -69,95 +68,8 @@ public class Delta {
         x is the distance of the vertex and w is the index of the vertex in the property map
 	 */
 	public void relax(int w, int x, Node prev) {
-//		 System.out.println("Called relax with vertex " + w + " and weight " + x);
-//		if (GreaterThanCAS(w, x)) {
-//			if (LessThanCAS(w, Integer.MAX_VALUE)) {
-//				int index = property_map.get(w).getWeight().get() / delta;
-//				if (bucket.get(index).contains(w)) {
-//					int new_val = x / delta;
-//					if (new_val != index) {
-//						bucket.remove(index);
-//					}
-//				}
-//				if (!bucket.containsKey(x / delta)) {
-//					Set<Integer> w_list = new ConcurrentSkipListSet<>();
-//					w_list.add(w);
-//					bucket.put(x / delta, w_list);
-//				} else {
-//					if (bucket.get(x / delta).contains(w)) {
-//						bucket.get(x / delta).add(w);
-//					}
-//				}
-//			} else {
-//				if (!bucket.containsKey(x / delta)) {
-//					Set<Integer> w_list = new ConcurrentSkipListSet<>();
-//					w_list.add(w);
-//					bucket.put(x / delta, w_list);
-//				} else {
-//                    bucket.get(x / delta).add(w);
-//				}
-//				delta *= 1.5;
-//			}
-////			property_map.get(w).setWeight(x);
-//		}
 		GreaterThanCAS(w, x, prev);
-
 	}
-
-	public HashMap<Integer, Integer> find_requests(Set<Integer> vertices, boolean kind, Graph g) {
-		HashMap<Integer, Integer> output = new HashMap<>();
-		for(int u: vertices) {
-			for(Node n: g.getAdjacentVertices(u).keySet()) {
-				int v = n.getID();
-				int edgeWeight = property_map.get(u).getWeight().get() + g.getEdgeWeight(u, v);
-				if (kind) {
-					if(g.getEdgeWeight(u,v) <= delta) {
-						if(output.containsKey(v)) {
-							if(edgeWeight < output.get(v)) {
-								output.put(v, edgeWeight);
-							}
-						} else {
-							output.put(v, edgeWeight);
-						}
-					}
-				} else {
-					if(g.getEdgeWeight(u,v) > delta) {
-						if(output.containsKey(v)) {
-							if(edgeWeight < output.get(v)) {
-								output.put(v, edgeWeight);
-							}
-						} else {
-							output.put(v, edgeWeight);
-						}
-					}
-				}
-			}
-		}
-		return output;
-	}
-
-//	public void relax_requests(HashMap<Integer,Integer> requests) {
-//		pool = new HashSet<>();
-//        for (Integer key : requests.keySet()) {
-//			Thread t = new Thread(() -> {
-//				int value = requests.get(key);
-//				relax(key, value);
-//			});
-//			pool.add(t);
-////			t.start();
-//
-//		}
-//		for(Thread t:pool) {
-//			t.start();
-//		}
-//		try {
-//			for(Thread t: pool) {
-//				t.join();
-//			}
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 	public void relax_requests(HashMap<Pair<Node,Node>, HashSet<Integer>> req) {
 		pool = new HashSet<>();
@@ -221,20 +133,7 @@ public class Delta {
 		Set<Node> s = new HashSet<>();
 		while(!bucket.isEmpty()) {
 			s.clear();
-//				int i = Collections.min(bucket.keySet());
-//				int sub_ctr = 0;
-//				Set<Integer> r = new ConcurrentSkipListSet<>();
-//				while(bucket.containsKey(i)) {
-//					req = find_requests(bucket.get(i), true, g);
-//					r.addAll(bucket.get(i));
-//					bucket.remove(i);
-//					relax_requests(req);
-//					sub_ctr +=1;
-//				}
-//				req = find_requests(r, false, g);
-//				relax_requests(req);
-//				ctr += 1;
-// 			in = Collections.min(bucket.keySet());
+ 			in = Collections.min(bucket.keySet());
 			requests.clear();
 			while(bucket.get(in) != null && !bucket.get(in).isEmpty()) {
 				for (Node v: bucket.get(in)) {
@@ -255,7 +154,7 @@ public class Delta {
 			relax_requests(requests);
 			if(bucket.get(in) != null && bucket.get(in).isEmpty())
 				bucket.remove(in);
-			in++;
+//			in++;
 		}
 		HashMap<Integer, Integer> out = new HashMap<>();
 		for(int i = 0; i < g.nodes().size(); i ++) {

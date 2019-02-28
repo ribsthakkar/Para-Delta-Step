@@ -45,13 +45,13 @@ public class Node implements Comparable<Node> {
 //        System.out.println(this.weight.get());
         this.weight.set(weight);
     }
-    public void setPrev(Node prev) {
+    public synchronized void setPrev(Node prev) {
 //        System.out.println("I am " + this);
 //        System.out.println("Original prev is " + this.prev.get());
 //        System.out.println("New prev is " + prev);
-        lock.lock();
+//        lock.lock();
         this.prev.set(prev);
-        lock.unlock();
+//        lock.unlock();
 
     }
 
