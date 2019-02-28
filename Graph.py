@@ -53,6 +53,7 @@ class Graph():
         return d
 
     def pathfromHere(self, current):
+        current = self._nodes[current]
         path = [current]
         while current.prev:
             path.append(current.prev)

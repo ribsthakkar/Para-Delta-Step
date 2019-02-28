@@ -69,19 +69,22 @@ public class Graph {
 		vertexList.get(source).setWeight(0);
 		Node current;
 		while(!q.isEmpty()) {
-			current = q.remove();
+			current = q.poll();
 			if(current.isVisited()) {
 				continue;
 			}
 			current.mark();
 			for(Node adjacent:current.getAdjacent().keySet()) {
-				int weight = current.getAdjacent().get(adjacent);
+				int edgeWeight = current.getAdjacent().get(adjacent);
 				if(!adjacent.isVisited()) {
-					if(adjacent.getWeight().get() > current.getWeight().get() + weight) {
-						adjacent.setWeight(current.getWeight().get() + weight);
+					if(adjacent.getWeight().get() > current.getWeight().get() + edgeWeight) {
+						adjacent.setWeight(current.getWeight().get() + edgeWeight);
 						adjacent.setPrev(current);
 					}
+					q.remove(adjacent);
 					q.add(adjacent);
+//					if(current.getID() == 49 && adjacent.getID() == 48)
+//						System.out.println(q);
 				}
 			}
 		}
@@ -118,7 +121,7 @@ public class Graph {
 			addArc(source, dest, weight);
 		}
 	}
-	public Stack<Node> getPath(int source) {
+	private Stack<Node> getPath_s(int source) {
 		Stack<Node> out = new Stack<>();
 		out.push(vertexList.get(source));
 		Node s = vertexList.get(source);
@@ -130,8 +133,16 @@ public class Graph {
 		return out;
 	}
 
+	public ArrayList<Node> getPath(int source) {
+		Stack<Node> out = getPath_s(source);
+		ArrayList<Node> o = new ArrayList<>();
+		while (!out.isEmpty()){
+			o.add(out.pop());
+		}
+		return o;
+	}
 	public int getPathCost(int source) {
-		Stack<Node> out = getPath(source);
+		Stack<Node> out = getPath_s(source);
 		Node first = out.pop();
 		Node next = null;
 		if(!out.isEmpty())
@@ -139,6 +150,7 @@ public class Graph {
 		int total  = 0;
 
 		while(first != null && next != null) {
+			System.out.println("For edge (" + first + "," + next + ") it costs " + getEdgeWeight(first.getID(), next.getID()));
 			total+= getEdgeWeight(first.getID(), next.getID());
 			first = next;
 			if(!out.isEmpty()) {

@@ -1,9 +1,6 @@
 import org.omg.PortableInterceptor.INACTIVE;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,7 +49,9 @@ public class Node implements Comparable<Node> {
 //        System.out.println("I am " + this);
 //        System.out.println("Original prev is " + this.prev.get());
 //        System.out.println("New prev is " + prev);
+        lock.lock();
         this.prev.set(prev);
+        lock.unlock();
 
     }
 
@@ -70,18 +69,23 @@ public class Node implements Comparable<Node> {
     }
     @Override
     public int compareTo(Node o) {
-        if(this.weight.get() < o.weight.get()) {
-            return -1;
-        } else if(this.weight.get() > o.weight.get()) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return Integer.compare(this.weight.get(), o.weight.get());
     }
 
+//    public int compare(Node node1, Node node2) {
+//        if (node1.weight.get() < node2.weight.get())
+//            return -1;
+//        if (node1.weight.get() > node2.weight.get())
+//            return 1;
+//        return 0;
+//    }
+    public boolean equals(Object o) {
+        return ((Node)o).getID() == this.getID();
+    }
     @Override
     public String toString() {
-        return "" + id;
+        return "ID:" + id + " Weight:" + weight ;
+//        return "" + id;
     }
 
 }
