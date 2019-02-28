@@ -122,14 +122,33 @@ public class Graph {
 		Stack<Node> out = new Stack<>();
 		out.push(vertexList.get(source));
 		Node s = vertexList.get(source);
-		int count = 0;
-		while(s.getPrev().get() != null && count < 10) {
+		while(s.getPrev().get() != null) {
 			out.push(s.getPrev().get());
 			s = s.getPrev().get();
-			count++;
 		}
 
 		return out;
+	}
+
+	public int getPathCost(int source) {
+		Stack<Node> out = getPath(source);
+		Node first = out.pop();
+		Node next = null;
+		if(!out.isEmpty())
+			next = out.pop();
+		int total  = 0;
+
+		while(first != null && next != null) {
+			total+= getEdgeWeight(first.getID(), next.getID());
+			first = next;
+			if(!out.isEmpty()) {
+				next = out.pop();
+			} else {
+				next = null;
+			}
+		}
+
+		return total;
 	}
 
 	public void resetPrev() {

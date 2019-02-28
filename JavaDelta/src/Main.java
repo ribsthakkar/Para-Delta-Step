@@ -12,7 +12,7 @@ public class Main {
 		int TESTS = 1;
 		System.out.println("Hello World!");
 		Graph graph;
-		String fileName = "wiki.dimacs";
+		String fileName = "another_t.dimacs";
 		graph = new Graph(true);
 		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 			stream.forEach(graph::addStringArc);
@@ -48,20 +48,12 @@ public class Main {
 			HashMap<Integer, Integer> dij = graph.dijsktra(5);
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
-			for(Node n: graph.getVertexList() ) {
-				System.out.println(graph.getPath(n.getID()));
-			}
-
 			graph.resetPrev();
 			Delta d = new Delta(10, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
 			totalTime += endTime - startTime;
-
-			for(Node n: graph.getVertexList() ) {
-				System.out.println(graph.getPath(n.getID()));
-			}
 
 			int count = 0;
 			if(delt != null && dij != null) {
@@ -75,6 +67,8 @@ public class Main {
 							System.out.println("For node #" + node);
 							System.out.println("Dijkstra gave " + out);
 							System.out.println("Delta gave " + other);
+							System.out.println(graph.getPath(node));
+							System.out.println(graph.getPathCost(node));
 							count++;
 						}
 					}
@@ -91,7 +85,11 @@ public class Main {
 //
 		System.out.println(graph.dijsktra(5));
 		for(Node n: graph.getVertexList() ) {
-			System.out.println(graph.getPath(n.getID()));
+			if(n.getID() == 58 || n.getID() == 57) {
+				System.out.println(graph.getPath(n.getID()));
+				System.out.println(graph.getPathCost(n.getID()));
+			}
+
 		}
 //		d.delta_stepping(graph);
 //
