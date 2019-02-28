@@ -33,8 +33,8 @@ public class Delta {
 			if(newValue >= local) {
 				return false; // swap failed
 			}
-			if (property_map.get(node).getWeight().compareAndSet(local, newValue) && property_map.get(node).getPrev().compareAndSet(pLocal, prev)) {
-
+			if (property_map.get(node).getWeight().compareAndSet(local, newValue)) {
+				property_map.get(node).setPrev(prev);
 				int i = local / delta;
 				if(bucket.containsKey(i)) {
 					bucket.get(i).remove(property_map.get(node));
@@ -193,7 +193,7 @@ public class Delta {
 			int n = node.getID();
 			property_map.get(n).setWeight(Integer.MAX_VALUE);
 			for(Node dest: node.getAdjacent().keySet()) {
-				if(node.getAdjacent().get(dest) > delta) {
+				if(node.getAdjacent().get(dest)  > delta) {
 					if(heavy.containsKey(node)) {
 						heavy.get(node).add(dest);
 					} else {
@@ -216,9 +216,11 @@ public class Delta {
 //		System.out.println(heavy.size());
 		relax(source, 0, null);
 		int ctr = 0;
-		while(bucket.size() > 0) {
-			Set<Node> s = new ConcurrentSkipListSet<>();
-			try {
+		HashMap<Pair<Node,Node>, HashSet<Integer>> requests = new HashMap<>();
+		int in = 0;
+		Set<Node> s = new HashSet<>();
+		while(!bucket.isEmpty()) {
+			s.clear();
 //				int i = Collections.min(bucket.keySet());
 //				int sub_ctr = 0;
 //				Set<Integer> r = new ConcurrentSkipListSet<>();
@@ -232,11 +234,11 @@ public class Delta {
 //				req = find_requests(r, false, g);
 //				relax_requests(req);
 //				ctr += 1;
-			int in = Collections.min(bucket.keySet());
-			HashMap<Pair<Node,Node>, HashSet<Integer>> requests = new HashMap<>();
-			while(!bucket.get(in).isEmpty()) {
+// 			in = Collections.min(bucket.keySet());
+			requests.clear();
+			while(bucket.get(in) != null && !bucket.get(in).isEmpty()) {
 				for (Node v: bucket.get(in)) {
-					HashSet<Node> ladj = light.remove(v);
+					HashSet<Node> ladj = light.get(v);
 					if(ladj != null)
 						setupRequests(g, requests, v, ladj);
 				}
@@ -244,19 +246,16 @@ public class Delta {
 				bucket.get(in).clear();
 				relax_requests(requests);
 			}
-			requests = new HashMap<>();
+			requests.clear();
 			for (Node v: s) {
-				HashSet<Node> wadj = heavy.remove(v);
+				HashSet<Node> wadj = heavy.get(v);
 				if(wadj != null)
 					setupRequests(g, requests, v, wadj);
 			}
 			relax_requests(requests);
-			if(bucket.get(in).isEmpty())
+			if(bucket.get(in) != null && bucket.get(in).isEmpty())
 				bucket.remove(in);
-			} catch (NoSuchElementException e) {
-				System.out.println(e);
-				return null;
-			}
+			in++;
 		}
 		HashMap<Integer, Integer> out = new HashMap<>();
 		for(int i = 0; i < g.nodes().size(); i ++) {

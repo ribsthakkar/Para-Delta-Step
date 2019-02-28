@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args)  {
 
-		int TESTS = 1;
+		int TESTS = 5;
 		System.out.println("Hello World!");
 		Graph graph;
 		String fileName = "another_t.dimacs";
@@ -49,7 +49,7 @@ public class Main {
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
 			graph.resetPrev();
-			Delta d = new Delta(10, 5, graph.getVertexList());
+			Delta d = new Delta(50, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
@@ -67,9 +67,10 @@ public class Main {
 							System.out.println("For node #" + node);
 							System.out.println("Dijkstra gave " + out);
 							System.out.println("Delta gave " + other);
-							System.out.println(graph.getPath(node));
-							System.out.println(graph.getPathCost(node));
+//							System.out.println(graph.getPath(node));
+//							System.out.println(graph.getPathCost(node));
 							count++;
+//							break;
 						}
 					}
 				}
@@ -82,15 +83,15 @@ public class Main {
 		long dTime = (dTotalTime) / TESTS;
 		System.out.printf("Delta takes Average %d nanoseconds\n", time);
 		System.out.printf("Dijks takes Average %d nanoseconds\n", dTime);
-//
-		System.out.println(graph.dijsktra(5));
-		for(Node n: graph.getVertexList() ) {
-			if(n.getID() == 58 || n.getID() == 57) {
-				System.out.println(graph.getPath(n.getID()));
-				System.out.println(graph.getPathCost(n.getID()));
-			}
 
-		}
+//		System.out.println(graph.dijsktra(5));
+//		graph.dijsktra(5);
+//		for(Node n: graph.getVertexList() ) {
+//			if(n.getID() == 73) {
+//				System.out.println(graph.getPath(n.getID()));
+//				System.out.println(graph.getPathCost(n.getID()));
+//			}
+//		}
 //		d.delta_stepping(graph);
 //
 //		for(Node node:d.property_map) {
