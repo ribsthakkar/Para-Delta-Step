@@ -92,7 +92,6 @@ public class Graph {
 		HashMap<Integer, Integer> out = new HashMap<>();
 		for(int i = 0; i < numNodes + 1; i ++) {
 			out.put(i, vertexList.get(i).getWeight().get());
-			vertexList.get(i).setWeight(Integer.MAX_VALUE);
 		}
 		return out;
 	}
@@ -147,10 +146,11 @@ public class Graph {
 		Node next = null;
 		if(!out.isEmpty())
 			next = out.pop();
-		int total  = 0;
-
+		if(first.getWeight().get() == Integer.MAX_VALUE)
+			return Integer.MAX_VALUE;
+		int total = 0;
 		while(first != null && next != null) {
-			System.out.println("For edge (" + first + "," + next + ") it costs " + getEdgeWeight(first.getID(), next.getID()));
+//			System.out.println("For edge (" + first + "," + next + ") it costs " + getEdgeWeight(first.getID(), next.getID()));
 			total+= getEdgeWeight(first.getID(), next.getID());
 			first = next;
 			if(!out.isEmpty()) {
@@ -161,6 +161,11 @@ public class Graph {
 		}
 
 		return total;
+	}
+
+	public void resetWeights() {
+		for(Node n: getVertexList())
+			n.setWeight(Integer.MAX_VALUE);
 	}
 
 	public void resetPrev() {

@@ -16,7 +16,7 @@ public class Main {
 		long endTime;
 		for(int i = 0; i < TESTS; i ++) {
 			Graph graph;
-			String fileName = "road-NY.dimacs";
+			String fileName = "another_t.dimacs";
 			graph = new Graph(true);
 			try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 				stream.forEach(graph::addStringArc);
@@ -24,12 +24,13 @@ public class Main {
 				e.printStackTrace();
 			}
 			graph.resetPrev();
+			graph.resetWeights();
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> dij = graph.dijsktra(5);
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
 			graph.resetPrev();
-			Delta d = new Delta(750, 5, graph.getVertexList());
+			Delta d = new Delta(150, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
@@ -47,14 +48,15 @@ public class Main {
 							System.out.println("For node #" + node);
 							System.out.println("Dijkstra gave " + out);
 							System.out.println("Delta gave " + other);
-//							System.out.println(graph.getPath(node));
-//							System.out.println(graph.getPathCost(node));
+							System.out.println(graph.getPath(node));
+							System.out.println(graph.getPathCost(node));
 							count++;
 //							break;
 						}
 					}
 				}
 			}
+			graph.resetWeights();
 //			System.out.println(i);
  			System.out.println("We had " + count + " nodes with errors;");
 		}

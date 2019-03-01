@@ -1,22 +1,22 @@
 import javafx.util.Pair;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 public class Delta {
     private int delta, source;
-    private Map<Integer, HashSet<Node>> bucket;
-    private Map<Node, HashSet<Node>> light;
-    private Map<Node,HashSet<Node>> heavy;
+    private ConcurrentHashMap<Integer, Set<Node>> bucket;
+    private ConcurrentHashMap<Node, Set<Node>> light;
+    private ConcurrentHashMap<Node,Set<Node>> heavy;
     public ArrayList<Node> property_map;
-    private Set<Thread> pool;
+    private ExecutorService pool;
 
     public Delta(int d, int source, ArrayList<Node> vertices) {
         this.source = source;
         delta = d;
         bucket = new ConcurrentHashMap<>();
         property_map = vertices;
-        pool = new HashSet<>();
+        pool = Executors.newFixedThreadPool(8);
         light = new ConcurrentHashMap<>();
         heavy = new ConcurrentHashMap<>();
 
@@ -25,24 +25,23 @@ public class Delta {
     private boolean GreaterThanCAS(int node, int newValue, Node prev) {
         while(true) {
             int local = property_map.get(node).getWeight().get();
-            Node pLocal = property_map.get(node).getPrev().get();
             if(newValue >= local) {
                 return false; // swap failed
             }
             if (property_map.get(node).getWeight().compareAndSet(local, newValue)) {
+                if(local < newValue) {
+                    System.out.println("BROKEN");
+                    System.out.println("Node " + node + " was updating from " + local + " to " + newValue);
+                    System.exit(1);
+                }
                 property_map.get(node).setPrev(prev);
                 int i = local / delta;
-                if(bucket.containsKey(i)) {
+                try {
                     bucket.get(i).remove(property_map.get(node));
-                }
+                } catch (NullPointerException ignored) {}
                 int n = newValue / delta;
-                if(bucket.containsKey(n)) {
-                    bucket.get(n).add(property_map.get(node));
-                } else {
-                    HashSet<Node> a = new HashSet<>();
-                    a.add(property_map.get(node));
-                    bucket.put(n, a);
-                }
+                bucket.putIfAbsent(n,Collections.newSetFromMap(new ConcurrentHashMap<>()));
+                bucket.get(n).add(property_map.get(node));
                 return true;  // swap successful }
             }
             // keep trying
@@ -57,32 +56,33 @@ public class Delta {
         GreaterThanCAS(w, x, prev);
     }
 
-    public void relax_requests(HashMap<Pair<Node,Node>, HashSet<Integer>> req) {
-        pool = new HashSet<>();
+    public void relax_requests(Map<Pair<Node,Node>, Set<Integer>> req) {
         for(Pair<Node,Node> n: req.keySet()) {
-            HashSet<Integer> weights = req.get(n);
-            for (int w: weights) {
-                Thread t = new Thread(() -> relax(n.getValue().getID(), w,n.getKey() ));
-                pool.add(t);
-                t.start();
+                Set<Integer> weights = req.getOrDefault(n, new HashSet<>());
+//                for(int weight: weights) {
+                    Thread t = new Thread(() -> {
+                        relax(n.getValue().getID(), Collections.min(weights), n.getKey());
+                    });
+                    pool.submit(t);
+//                }
             }
-        }
-        try {
-            for(Thread t:pool) {
-                t.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+//        try {
+//            for(Thread t:pool) {
+//                t.join();
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
-    public void relax_requests_s(HashMap<Pair<Node,Node>, HashSet<Integer>> req) {
-        pool = new HashSet<>();
+    public void relax_requests_s(Map<Pair<Node,Node>, Set<Integer>> req) {
         for(Pair<Node,Node> n: req.keySet()) {
-            HashSet<Integer> weights = req.get(n);
-            for (int w: weights) {
-                relax(n.getValue().getID(), w,n.getKey());
-            }
+            Set<Integer> weights = req.getOrDefault(n, new HashSet<>());
+//            for (int w: weights) {
+//                relax(n.getValue().getID(), w,n.getKey());
+//            }
+            relax(n.getValue().getID(), Collections.min(weights), n.getKey());
         }
     }
     public HashMap<Integer, Integer> delta_stepping(Graph g) {
@@ -92,73 +92,80 @@ public class Delta {
             property_map.get(n).setWeight(Integer.MAX_VALUE);
             for(Node dest: node.getAdjacent().keySet()) {
                 if(node.getAdjacent().get(dest)  > delta) {
-                    if(heavy.containsKey(node)) {
-                        heavy.get(node).add(dest);
-                    } else {
-                        HashSet<Node> nodes = new HashSet<>();
-                        nodes.add(dest);
-                        heavy.put(node, nodes);
-                    }
+                    splitEdges(node, dest, heavy);
                 } else {
-                    if(light.containsKey(node)) {
-                        light.get(node).add(dest);
-                    } else {
-                        HashSet<Node> nodes = new HashSet<>();
-                        nodes.add(dest);
-                        light.put(node, nodes);
-                    }
+                    splitEdges(node, dest, light);
                 }
             }
         }
 //		System.out.println(light.size());
 //		System.out.println(heavy.size());
         relax(source, 0, null);
-        int ctr = 0;
-        HashMap<Pair<Node,Node>, HashSet<Integer>> requests = new HashMap<>();
+        Map<Pair<Node,Node>, Set<Integer>> requests = new ConcurrentHashMap<>();
         int in = 0;
-        Set<Node> s = new HashSet<>();
+        Set<Node> s = Collections.newSetFromMap(new ConcurrentHashMap<>());
         while(!bucket.isEmpty()) {
             s.clear();
-// 			in = Collections.min(bucket.keySet());
+ 			in = Collections.min(bucket.keySet());
             requests.clear();
             while(bucket.get(in) != null && !bucket.get(in).isEmpty()) {
                 for (Node v: bucket.get(in)) {
-                    HashSet<Node> ladj = light.get(v);
+                    Set<Node> ladj = light.get(v);
                     if(ladj != null)
                         setupRequests(g, requests, v, ladj);
                 }
                 s.addAll(bucket.get(in));
                 bucket.get(in).clear();
                 relax_requests(requests);
+//                System.out.println("Relaxing light");
             }
             requests.clear();
             for (Node v: s) {
-                HashSet<Node> wadj = heavy.get(v);
-                if(wadj != null)
-                    setupRequests(g, requests, v, wadj);
+                Set<Node> hadj = heavy.get(v);
+                if(hadj != null)
+                    setupRequests(g, requests, v, hadj);
             }
             relax_requests(requests);
-            if(bucket.get(in) != null && bucket.get(in).isEmpty())
-                bucket.remove(in);
-            in++;
+//            System.out.println("Relaxing heavy");
+            try {
+                if (bucket.get(in).isEmpty())
+                    bucket.remove(in);
+            }catch (NullPointerException ignored) {}
+//            in++;
+        }
+        pool.shutdown();
+        try {
+            System.out.println("Waiting");
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            System.out.println("Terminated");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         HashMap<Integer, Integer> out = new HashMap<>();
         for(int i = 0; i < g.nodes().size(); i ++) {
             out.put(i, g.getVertexList().get(i).getWeight().get());
-            g.getVertexList().get(i).setWeight(Integer.MAX_VALUE);
         }
         return out;
     }
 
-    private void setupRequests(Graph g, HashMap<Pair<Node, Node>, HashSet<Integer>> requests, Node v, HashSet<Node> adj) {
+    private void splitEdges(Node node, Node dest, ConcurrentHashMap<Node, Set<Node>> buck) {
+        buck.putIfAbsent(node, Collections.newSetFromMap(new ConcurrentHashMap<>()));
+        buck.get(node).add(dest);
+    }
+
+    private void setupRequests(Graph g, Map<Pair<Node, Node>, Set<Integer>> requests, Node v, Set<Node> adj) {
+        Pair<Node,Node> p;
         for(Node w: adj) {
-            if (requests.containsKey(new Pair<>(v, w))) {
-                requests.get(new Pair<>(v, w)).add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
-            } else {
-                HashSet<Integer> a = new HashSet<>();
-                a.add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
-                requests.put(new Pair<>(v, w), a);
-            }
+//            if (requests.containsKey(new Pair<>(v, w))) {
+//                requests.get(new Pair<>(v, w)).add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
+//            } else {
+//                HashSet<Integer> a = new HashSet<>();
+//                a.add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
+//                requests.put(new Pair<>(v, w), a);
+//            }
+            p = new Pair<>(v, w);
+            requests.putIfAbsent(p, Collections.newSetFromMap(new ConcurrentHashMap<>()));
+            requests.get(p).add(g.getEdgeWeight(v.getID(), w.getID()) + v.getWeight().get());
         }
     }
 
