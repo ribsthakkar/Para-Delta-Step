@@ -30,7 +30,7 @@ public class Main {
 			endTime = System.nanoTime();
 			dTotalTime += endTime - startTime;
 			graph.resetPrev();
-			Delta d = new Delta(150, 5, graph.getVertexList());
+			Delta d = new Delta(20, 5, graph.getVertexList());
 			startTime = System.nanoTime();
 			HashMap<Integer, Integer> delt = d.delta_stepping(graph);
 			endTime = System.nanoTime();
@@ -48,10 +48,9 @@ public class Main {
 							System.out.println("For node #" + node);
 							System.out.println("Dijkstra gave " + out);
 							System.out.println("Delta gave " + other);
-							System.out.println(graph.getPath(node));
-							System.out.println(graph.getPathCost(node));
+//							System.out.println(graph.getPath(node));
+//							System.out.println(graph.getPathCost(node));
 							count++;
-//							break;
 						}
 					}
 				}
@@ -59,6 +58,8 @@ public class Main {
 			graph.resetWeights();
 //			System.out.println(i);
  			System.out.println("We had " + count + " nodes with errors;");
+ 			if(count != 0)
+ 				break;
 		}
 
 		long time = (totalTime) / TESTS;

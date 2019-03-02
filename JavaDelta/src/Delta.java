@@ -36,13 +36,16 @@ public class Delta {
                 }
                 property_map.get(node).setPrev(prev);
                 int i = local / delta;
-                try {
-                    bucket.get(i).remove(property_map.get(node));
-                } catch (NullPointerException ignored) {}
                 int n = newValue / delta;
-                bucket.putIfAbsent(n,Collections.newSetFromMap(new ConcurrentHashMap<>()));
-                bucket.get(n).add(property_map.get(node));
-                return true;  // swap successful }
+                if(i != n) {
+                    try {
+                        bucket.get(i).remove(property_map.get(node));
+                    } catch (NullPointerException ignored) {
+                    }
+                    bucket.putIfAbsent(n, Collections.newSetFromMap(new ConcurrentHashMap<>()));
+                    bucket.get(n).add(property_map.get(node));
+                    return true;  // swap successful }
+                    }
             }
             // keep trying
         }
@@ -53,12 +56,16 @@ public class Delta {
         x is the distance of the vertex and w is the index of the vertex in the property map
      */
     public void relax(int w, int x, Node prev) {
+//        if(prev != null)
+//            System.out.println(prev.getID() + " called relax on " + w + " with weight " +  x);
         GreaterThanCAS(w, x, prev);
     }
 
     public void relax_requests(Map<Pair<Node,Node>, Set<Integer>> req) {
         for(Pair<Node,Node> n: req.keySet()) {
+//                System.out.println(n);
                 Set<Integer> weights = req.getOrDefault(n, new HashSet<>());
+                req.remove(n);
 //                for(int weight: weights) {
                     Thread t = new Thread(() -> {
                         relax(n.getValue().getID(), Collections.min(weights), n.getKey());
@@ -98,20 +105,19 @@ public class Delta {
                 }
             }
         }
-//		System.out.println(light.size());
-//		System.out.println(heavy.size());
         relax(source, 0, null);
         Map<Pair<Node,Node>, Set<Integer>> requests = new ConcurrentHashMap<>();
         int in = 0;
         Set<Node> s = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        while(!bucket.isEmpty()) {
+        while (!bucket.isEmpty()) {
             s.clear();
- 			in = Collections.min(bucket.keySet());
-            requests.clear();
-            while(bucket.get(in) != null && !bucket.get(in).isEmpty()) {
-                for (Node v: bucket.get(in)) {
+            try {in = Collections.min(bucket.keySet());} catch (NoSuchElementException e){continue;}
+            while (bucket.get(in) != null && !bucket.get(in).isEmpty()) {
+//                System.out.println("In=" + in + " and this contains " + bucket.get(in));
+//                System.out.println(bucket.get(in));
+                for (Node v : bucket.get(in)) {
                     Set<Node> ladj = light.get(v);
-                    if(ladj != null)
+                    if (ladj != null)
                         setupRequests(g, requests, v, ladj);
                 }
                 s.addAll(bucket.get(in));
@@ -119,10 +125,9 @@ public class Delta {
                 relax_requests(requests);
 //                System.out.println("Relaxing light");
             }
-            requests.clear();
-            for (Node v: s) {
+            for (Node v : s) {
                 Set<Node> hadj = heavy.get(v);
-                if(hadj != null)
+                if (hadj != null)
                     setupRequests(g, requests, v, hadj);
             }
             relax_requests(requests);
@@ -130,14 +135,22 @@ public class Delta {
             try {
                 if (bucket.get(in).isEmpty())
                     bucket.remove(in);
-            }catch (NullPointerException ignored) {}
+            } catch (NullPointerException ignored) {
+            }
 //            in++;
         }
         pool.shutdown();
         try {
             System.out.println("Waiting");
+            System.out.println("Buck Size is " + bucket.size());
             pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             System.out.println("Terminated");
+            if(bucket.size() > 0) {
+                System.out.println(bucket);
+                System.out.println(s);
+                System.out.println(requests);
+                System.out.println("BUCKET STILL HAS WORK");
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
